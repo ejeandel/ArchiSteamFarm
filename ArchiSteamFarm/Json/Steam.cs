@@ -44,6 +44,7 @@ namespace ArchiSteamFarm.Json {
 			internal ulong ClassID { get; private set; }
 			internal ulong ContextID { get; private set; }
 			internal uint RealAppID { get; set; }
+			internal string Name { get; set; }
 			internal EType Type { get; set; }
 
 			[JsonProperty(PropertyName = "amount", Required = Required.Always)]
@@ -139,6 +140,7 @@ namespace ArchiSteamFarm.Json {
 				Amount = amount;
 				RealAppID = realAppID;
 				Type = type;
+				Name = "";
 			}
 
 			// Deserialized from JSON

@@ -953,6 +953,8 @@ namespace ArchiSteamFarm {
 							}
 
 							goto default;
+						case "LIST":
+							return await ResponseList(steamID).ConfigureAwait(false);
 						case "LOOT":
 							return await ResponseLoot(steamID).ConfigureAwait(false);
 						case "LOOT&":
@@ -3602,6 +3604,40 @@ namespace ArchiSteamFarm {
 			return responses.Count > 0 ? string.Join("", responses) : null;
 		}
 
+		private async Task<string> ResponseList(ulong steamID) {
+			if (steamID == 0) {
+				ArchiLogger.LogNullError(nameof(steamID));
+				return null;
+			}
+
+			if (!IsMaster(steamID)) {
+				return null;
+			}
+
+			if (!IsConnectedAndLoggedOn) {
+				return FormatBotResponse(Strings.BotNotConnected);
+			}
+
+			if (BotConfig.LootableTypes.Count == 0) {
+				return FormatBotResponse(Strings.BotLootingNoLootableTypes);
+			}
+
+			HashSet<Steam.Asset> inventory = await ArchiWebHandler.GetMyInventory(true, wantedTypes: BotConfig.LootableTypes).ConfigureAwait(false);
+			if ((inventory == null) || (inventory.Count == 0)) {
+			    return FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(inventory)));
+			}
+
+
+			StringBuilder response = new StringBuilder();
+
+			foreach (Steam.Asset asset in inventory) {
+			    response.Append(FormatBotResponse(string.Format("{3} ({0}/{2}-{1})\n", asset.AppID, asset.RealAppID, asset.AssetID, asset.Name)));
+			}
+
+			return response.ToString();
+			
+		}
+	    	    
 		private async Task<string> ResponseLoot(ulong steamID) {
 			if (steamID == 0) {
 				ArchiLogger.LogNullError(nameof(steamID));
